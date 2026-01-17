@@ -28,7 +28,7 @@ class SchedulerTests {
 
     @Test
     void initSchedulerWithClock(){
-        MutableClock clock = new MutableClock(Instant.parse("2025-01-17T12:00:00Z"));
+        MutableClock clock = new MutableClock(Instant.parse("2026-01-17T12:00:00Z"));
 
         scheduler = new Scheduler(clock);
 
@@ -73,7 +73,7 @@ class SchedulerTests {
 
     @Test
     void scheduledTaskExecutesAction(){
-        MutableClock clock = new MutableClock(Instant.parse("2025-01-17T12:00:00Z"));
+        MutableClock clock = new MutableClock(Instant.parse("2026-01-17T12:00:00Z"));
         scheduler = new Scheduler(clock);
 
         Runnable actionMock = mock(Runnable.class);
@@ -93,7 +93,7 @@ class SchedulerTests {
 
     @Test
     void executeTaskEverySecond(){
-        MutableClock clock = new MutableClock(Instant.parse("2025-01-17T12:00:00Z"));
+        MutableClock clock = new MutableClock(Instant.parse("2026-01-17T12:00:00Z"));
         scheduler = new Scheduler(clock);
 
         Runnable actionMock = mock(Runnable.class);
@@ -110,7 +110,7 @@ class SchedulerTests {
 
     @Test
     void executeTaskEveryFiveMinutes(){
-        MutableClock clock = new MutableClock(Instant.parse("2025-01-17T12:00:00Z"));
+        MutableClock clock = new MutableClock(Instant.parse("2026-01-17T12:00:00Z"));
         scheduler = new Scheduler(clock);
 
         Runnable actionMock = mock(Runnable.class);
@@ -123,6 +123,29 @@ class SchedulerTests {
         }
 
         verify(actionMock, times(2)).run();
+    }
+
+    @Test
+    void executeTaskEvery30MinutesOf8h9h10hOn1stAnd15th(){
+        MutableClock clock = new MutableClock(Instant.parse("2025-02-01T00:00:00Z"));
+        scheduler = new Scheduler(clock);
+
+        Runnable actionMock = mock(Runnable.class);
+        Task task = new Task("Task 1", "0 0,30 8-10 1,15 * *", actionMock);
+        scheduler.setTask(task);
+
+        clock.plusHours(7); // 2026/02/01 7h00
+        scheduler.update();
+        clock.plusMinutes(90); // 2026/02/01 8h30
+        scheduler.update(); // should execute now
+        clock.plusHours(1); // 2026/02/01 9h30
+        scheduler.update(); // should execute now
+        clock.plusDays(8); // 2026/02/09 9h30
+        scheduler.update();
+        clock.plusDays(6); // 2026/02/15 9h30
+        scheduler.update(); // should execute now
+
+        verify(actionMock, times(3)).run();
     }
 
     static class MutableClock extends Clock {
@@ -139,6 +162,9 @@ class SchedulerTests {
         }
         public void plusHours(long hours) {
             this.instant = this.instant.plus(hours, ChronoUnit.HOURS);
+        }
+        public void plusDays(long days) {
+            this.instant = this.instant.plus(days, ChronoUnit.DAYS);
         }
 
         @Override public ZoneId getZone() { return zone; }
