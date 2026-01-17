@@ -3,6 +3,8 @@ package com.tdd.scheduler;
 import lombok.Getter;
 
 import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 @Getter
@@ -28,7 +30,15 @@ public class Scheduler {
         return scheduledTasks;
     }
 
-    void update(){
 
+    void update() {
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        scheduledTasks.forEach(task -> {
+            LocalDateTime nextExecution = task.getCronExpression().next(now.minusSeconds(1));
+
+            if (nextExecution != null && nextExecution.isEqual(now))
+                task.getAction().run();
+        });
     }
 }
