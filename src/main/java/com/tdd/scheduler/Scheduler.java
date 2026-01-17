@@ -27,7 +27,10 @@ public class Scheduler {
     }
 
     void setTask(String name, Task task){
-
+        if(scheduledTasks.stream().anyMatch(t -> t.getName().equals(name))){
+            scheduledTasks.removeIf(t -> t.getName().equals(name));
+            scheduledTasks.add(task);
+        }
     }
 
     ArrayList<Task> getScheduledTasks(){
