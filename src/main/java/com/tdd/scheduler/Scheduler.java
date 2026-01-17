@@ -6,6 +6,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Objects;
 
 @Getter
 public class Scheduler {
@@ -26,11 +27,8 @@ public class Scheduler {
         scheduledTasks.add(task);
     }
 
-    void setTask(String name, Task task){
-        if(scheduledTasks.stream().anyMatch(t -> t.getName().equals(name))){
-            scheduledTasks.removeIf(t -> t.getName().equals(name));
-            scheduledTasks.add(task);
-        }
+    void setTask(String taskName, Task task){
+        scheduledTasks.replaceAll(t -> t.getName().equals(taskName) ? task : t);
     }
 
     ArrayList<Task> getScheduledTasks(){
