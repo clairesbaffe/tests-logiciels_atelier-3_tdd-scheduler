@@ -26,6 +26,10 @@ public class Scheduler {
         scheduledTasks.add(task);
     }
 
+    void setTask(String name, Task task){
+
+    }
+
     ArrayList<Task> getScheduledTasks(){
         return scheduledTasks;
     }

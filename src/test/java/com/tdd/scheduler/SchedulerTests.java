@@ -48,6 +48,20 @@ class SchedulerTests {
     }
 
     @Test
+    void updateScheduledTask(){
+        Task task = new Task("Task 1", "0 0 0 13 * 5", () -> System.out.println("hello"));
+        scheduler.setTask(task);
+
+        Task modifiedTask = new Task("Task 2", "0 0 0 13 * 5", () -> System.out.println("hello"));
+        scheduler.setTask("Task 1", modifiedTask);
+
+        ArrayList<Task> expected = new ArrayList<>();
+        expected.add(modifiedTask);
+
+        assertEquals(expected, scheduler.getScheduledTasks());
+    }
+
+    @Test
     void scheduledTaskExecutesAction(){
         MutableClock clock = new MutableClock(Instant.parse("2025-01-17T12:00:00Z"));
         scheduler = new Scheduler(clock);
