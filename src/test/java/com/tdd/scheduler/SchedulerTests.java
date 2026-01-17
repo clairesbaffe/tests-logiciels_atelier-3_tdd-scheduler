@@ -62,6 +62,16 @@ class SchedulerTests {
     }
 
     @Test
+    void notAddingScheduledTaskIfNotExistingWhenUpdating(){
+        Task modifiedTask = new Task("Task 2", "0 0 0 13 * 5", () -> System.out.println("hello"));
+        scheduler.setTask("Task 1", modifiedTask);
+
+        ArrayList<Task> expected = new ArrayList<>();
+
+        assertEquals(expected, scheduler.getScheduledTasks());
+    }
+
+    @Test
     void scheduledTaskExecutesAction(){
         MutableClock clock = new MutableClock(Instant.parse("2025-01-17T12:00:00Z"));
         scheduler = new Scheduler(clock);
@@ -79,6 +89,40 @@ class SchedulerTests {
         scheduler.update();
 
         verify(actionMock, times(1)).run();
+    }
+
+    @Test
+    void executeTaskEverySecond(){
+        MutableClock clock = new MutableClock(Instant.parse("2025-01-17T12:00:00Z"));
+        scheduler = new Scheduler(clock);
+
+        Runnable actionMock = mock(Runnable.class);
+        Task task = new Task("Task 1", "* * * * * *", actionMock);
+        scheduler.setTask(task);
+
+        for (int i = 0; i < 10; i++) {
+            clock.plusSeconds(1);
+            scheduler.update();
+        }
+
+        verify(actionMock, times(10)).run();
+    }
+
+    @Test
+    void executeTaskEveryFiveMinutes(){
+        MutableClock clock = new MutableClock(Instant.parse("2025-01-17T12:00:00Z"));
+        scheduler = new Scheduler(clock);
+
+        Runnable actionMock = mock(Runnable.class);
+        Task task = new Task("Task 1", "0 */5 * * * *", actionMock);
+        scheduler.setTask(task);
+
+        for (int i = 0; i < 10; i++) {
+            clock.plusMinutes(1);
+            scheduler.update();
+        }
+
+        verify(actionMock, times(2)).run();
     }
 
     static class MutableClock extends Clock {
